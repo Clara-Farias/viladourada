@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="pt-BR" data-exige-login="sim">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Golden Gov · Painel da Prefeitura</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/v3.css">
+  <link rel="stylesheet" href="css/mapa-premium.css">
+  <link rel="stylesheet" href="css/mapa-modos.css">
+  <link rel="stylesheet" href="css/crise.css">
+  <link rel="stylesheet" href="css/resumo-dia.css">
+  <link rel="stylesheet" href="css/secretarias.css">
+  <link rel="stylesheet" href="css/indicadores.css">
+  <link rel="stylesheet" href="css/social.css">
+  <link rel="stylesheet" href="css/perfis.css">
+  <link rel="stylesheet" href="css/widgets-ia.css">
+  <link rel="stylesheet" href="css/widgets-extra.css">
+  <link rel="stylesheet" href="css/resumo-semana.css">
+  <link rel="stylesheet" href="css/icone-copiloto.css">
+  <link rel="stylesheet" href="css/golden.css">
+  <!-- Marca (white label) e sessão: antes de tudo, para as cores entrarem no primeiro desenho. -->
+  <script src="js/marca-config.js"></script>
+  <script src="js/marca.js"></script>
+  <script src="js/sessao.js"></script>
+</head>
+<body data-pagina="gestor">
+  <!-- Tela de carregamento: some quando o mapa termina de carregar (ou depois de alguns segundos, no máximo). -->
+  <div id="carregando" class="carregando" role="status" aria-live="polite">
+    <div class="carregando-caixa">
+      <div class="carregando-anel" aria-hidden="true"><i class="ti ti-building-community"></i></div>
+      <b id="carregando-nome">Painel do Prefeito</b>
+      <span>Carregando o mapa e os indicadores da cidade…</span>
+      <i class="carregando-barra" aria-hidden="true"></i>
+    </div>
+  </div>
+  <div class="app menu-recolhido chat-recolhido">
+    <nav id="menu" class="menu vidro" aria-label="Telas do painel"></nav>
+
+    <!-- Palco: o mapa ocupa a janela; tudo o mais flutua por cima. Ao rolar, encolhe até uma faixa. -->
+    <section id="palco" class="palco" aria-label="Mapa da cidade">
+      <div id="mapa" class="mapa"></div>
+      <div class="esmaecer" aria-hidden="true"></div>
+
+      <header class="topo vidro">
+        <!-- Cabeçalho enxuto: nome + ponto "ao vivo" (a hora fica no title), 3 números e 3 botões. -->
+        <h1><span id="cidade-nome">Vila Dourada</span> <span class="ao-vivo" id="ao-vivo" title="Ao vivo" role="img" aria-label="Dados ao vivo"></span><span id="relogio" class="so-leitor"></span></h1>
+        <span class="selo-demo" title="Vila Dourada é uma cidade fictícia: todos os números deste painel são de demonstração.">Demonstração<span class="selo-demo-longo">&nbsp;· dados fictícios</span></span>
+        <section id="kpis" class="faixa" aria-label="Números-chave"></section>
+        <div class="topo-botoes">
+          <button type="button" id="btn-alertas" class="btn-vidro btn-alertas" aria-expanded="false" aria-controls="gaveta-atencao" title="Alertas: o que precisa de você"><i class="ti ti-bell" aria-hidden="true"></i> <span class="rot">Alertas</span> <span id="alertas-contador" class="alertas-contador" hidden></span></button>
+          <button type="button" id="chat-aba" class="btn-vidro btn-ia" aria-expanded="false" aria-controls="gaveta-copiloto" title="Assistente de IA" data-marca-attr="title:{agente} · assistente de IA"><i class="ic-copiloto ic-ia" aria-hidden="true"></i> <span class="rot" data-marca="agente">Áurea</span> <span id="chat-nao-lidas" class="chat-nao-lidas" title="Mensagens novas do Copiloto" hidden></span></button>
+          <!-- Menu ⋯: o que é de uso raro ou só da demonstração. -->
+          <div class="mais">
+            <button type="button" id="btn-mais" class="btn-vidro" aria-haspopup="true" aria-expanded="false" aria-controls="menu-mais" title="Mais opções" aria-label="Mais opções"><i class="ti ti-dots" aria-hidden="true"></i></button>
+            <div id="menu-mais" class="menu-mais vidro" hidden>
+              <button type="button" id="btn-widgets" class="item-mais" aria-expanded="false" aria-controls="gaveta-widgets"><i class="ti ti-layout-dashboard" aria-hidden="true"></i> Configurar widgets</button>
+              <button type="button" id="btn-dados" class="item-mais"><i class="ti ti-database" aria-hidden="true"></i> Dados</button>
+              <button type="button" id="btn-personalizar" class="item-mais"><i class="ti ti-palette" aria-hidden="true"></i> Personalizar</button>
+              <button type="button" id="btn-admin" class="item-mais"><i class="ti ti-settings" aria-hidden="true"></i> Administração</button>
+              <button type="button" id="btn-telao" class="item-mais"><i class="ti ti-device-tv" aria-hidden="true"></i> Modo telão</button>
+              <button type="button" id="btn-tour" class="item-mais"><i class="ti ti-player-play" aria-hidden="true"></i> Tour guiado</button>
+              <hr>
+              <label class="item-mais-campo">Cidade da demonstração
+                <select id="cidade-sel" class="cidade-sel" aria-label="Cidade da demonstração"></select></label>
+              <label class="item-mais-campo">Perfil de acesso
+                <select id="perfil-sel" class="cidade-sel" aria-label="Perfil de acesso"></select></label>
+              <p id="perfil-desc" class="item-mais-dica"></p>
+              <p class="item-mais-dica">Atalho da demonstração: <kbd>N</kbd> simula uma ocorrência nova.</p>
+              <hr>
+              <p id="sessao-quem" class="item-mais-dica"></p>
+              <button type="button" id="btn-sair" class="item-mais"><i class="ti ti-logout" aria-hidden="true"></i> Sair</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Uma fileira só sobre o mapa: busca e seletor de visualização à esquerda; à direita, Filtros e Camadas. -->
+      <div class="sob-topo">
+        <!-- Busca rápida: a lupa abre um campo para achar bairro, ocorrência, escola, hospital… (atalho: /). -->
+        <div id="busca" class="busca">
+          <button type="button" id="btn-busca" class="btn-vidro btn-busca" aria-expanded="false" aria-controls="busca-caixa" aria-label="Buscar" title="Buscar (atalho: /)"><i class="ti ti-search" aria-hidden="true"></i></button>
+          <div id="busca-caixa" class="busca-caixa vidro" hidden>
+            <div class="busca-campo">
+              <i class="ti ti-search" aria-hidden="true"></i>
+              <input id="busca-input" type="text" autocomplete="off" spellcheck="false" placeholder="Buscar bairro, ocorrência, escola, hospital…" aria-label="Buscar no painel" role="combobox" aria-expanded="false" aria-controls="busca-lista" aria-autocomplete="list">
+              <kbd>Esc</kbd>
+              <button type="button" id="busca-fechar" class="busca-fechar" aria-label="Fechar busca" title="Fechar (Esc)"><i class="ti ti-x" aria-hidden="true"></i></button>
+            </div>
+            <ul id="busca-lista" class="busca-lista" role="listbox" aria-label="Resultados da busca"></ul>
+          </div>
+        </div>
+        <!-- Visualizações rápidas: troca o conjunto de filtros + widgets num clique (salvar e descartar ficam na lista). -->
+        <div id="vistas" class="vistas vidro" aria-label="Visualização"></div>
+        <div id="mapa-controles" class="mapa-controles">
+          <button type="button" id="btn-limpar-camada" class="btn-vidro" hidden><i class="ti ti-x" aria-hidden="true"></i> Limpar camada</button>
+          <!-- Filtros ao lado de Camadas: os dois decidem o que aparece no mapa. -->
+          <button type="button" id="btn-filtros" class="btn-vidro btn-filtros" aria-expanded="false" aria-controls="gaveta-filtros" title="Filtros e visualização"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i> <span class="rot">Filtros</span> <span class="filtros-contador" hidden></span></button>
+          <div class="camadas">
+            <button type="button" id="btn-camadas" class="btn-vidro" aria-haspopup="true" aria-expanded="false" aria-controls="painel-camadas" title="Camadas do mapa"><i class="ti ti-stack-2" aria-hidden="true"></i> <span class="rot">Camadas</span> <span id="camadas-contador" class="camadas-contador" hidden></span></button>
+            <div id="painel-camadas" class="painel-camadas vidro" role="group" aria-label="Camadas do mapa" hidden>
+              <div class="painel-camadas-cab"><p class="painel-camadas-titulo">Mostrar no mapa</p><button type="button" id="camadas-limpar" class="camadas-limpar" disabled><i class="ti ti-eraser" aria-hidden="true"></i> Limpar todas</button></div>
+              <label class="toggle"><input type="checkbox" id="toggle-frota"> <i class="ti ti-bus" aria-hidden="true"></i> Frota e linhas</label>
+              <label class="toggle"><input type="checkbox" id="toggle-coleta"> <i class="ti ti-truck" aria-hidden="true"></i> Coleta de lixo</label>
+              <label class="toggle"><input type="checkbox" id="toggle-escolas"> <i class="ti ti-school" aria-hidden="true"></i> Escolas</label>
+              <label class="toggle"><input type="checkbox" id="toggle-obras"> <i class="ti ti-crane" aria-hidden="true"></i> Obras</label>
+              <label class="toggle"><input type="checkbox" id="toggle-risco"> <i class="ti ti-alert-triangle ic-alerta" aria-hidden="true"></i> Áreas de risco</label>
+              <label class="toggle"><input type="checkbox" id="toggle-calor-bo"> <i class="ti ti-flame ic-critica" aria-hidden="true"></i> B.O.s (30 dias)</label>
+              <label class="toggle"><input type="checkbox" id="toggle-leitos"> <i class="ti ti-bed" aria-hidden="true"></i> Leitos</label>
+              <label class="toggle"><input type="checkbox" id="toggle-farmacias"> <i class="ti ti-pill" aria-hidden="true"></i> Medicamentos</label>
+              <label class="toggle"><input type="checkbox" id="toggle-conquistas"> <i class="ti ti-star ic-ouro" aria-hidden="true"></i> Conquistas</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="mapa-legenda" class="mapa-legenda" hidden></div>
+
+      <div class="base-palco">
+        <div id="legenda" class="legenda">
+          <button type="button" class="btn-vidro legenda-alternar" aria-expanded="false" aria-controls="mapa-legenda-fixa"><i class="ti ti-list-details" aria-hidden="true"></i> Legenda</button>
+          <div id="mapa-legenda-fixa" class="mapa-legenda-fixa vidro" aria-label="Legenda do mapa" hidden></div>
+        </div>
+      </div>
+
+      <!-- Doca na base do mapa: cada painel abre só no clique (a rodinha do mouse é do zoom do mapa). -->
+      <div id="doca" class="doca">
+        <section id="resumo-dia" class="resumo-dia vidro" aria-label="Resumo do dia" hidden></section>
+        <section id="resumo-semana" class="resumo-dia resumo-semana vidro" aria-label="Resumo da semana" hidden></section>
+        <div class="doca-botoes vidro" role="toolbar" aria-label="Painéis do mapa">
+          <button type="button" id="btn-resumo-dia" class="doca-btn" aria-expanded="false" aria-controls="resumo-dia"><i class="ti ti-sun" aria-hidden="true"></i> <span class="rot">Resumo do dia</span><span class="rot-curto">Resumo</span> <span id="resumo-dia-n" class="rd-n" hidden></span> <i class="ti ti-chevron-up doca-seta" aria-hidden="true"></i></button>
+          <button type="button" id="btn-resumo-semana" class="doca-btn" aria-expanded="false" aria-controls="resumo-semana"><i class="ti ti-calendar-week" aria-hidden="true"></i> <span class="rot">Resumo da semana</span><span class="rot-curto">Semana</span> <i class="ti ti-chevron-up doca-seta" aria-hidden="true"></i></button>
+          <button type="button" id="ir-dashboard" class="doca-btn" aria-expanded="false" aria-controls="dashboard"><i class="ti ti-chart-bar" aria-hidden="true"></i> <span class="rot">Indicadores</span><span class="rot-curto">Indicadores</span> <i class="ti ti-chevron-up doca-seta" aria-hidden="true"></i></button>
+        </div>
+      </div>
+      <div id="aviso-novo" class="aviso-novo vidro" role="status" aria-live="polite" hidden></div>
+    </section>
+
+    <!-- Indicadores: a única porta é "Indicadores" na doca (ou #/indicadores). A gaveta sobe da base e
+         cobre a tela inteira; duas abas: Painel (widgets) e Metas e fichas (catálogo de js/tela-indicadores.js). -->
+    <main id="dashboard" class="dashboard" aria-label="Indicadores" hidden>
+      <header class="dash-topo">
+        <h2>Indicadores <small id="dash-escopo"></small></h2>
+        <div class="dash-abas" role="tablist" aria-label="Indicadores">
+          <button type="button" role="tab" id="aba-widgets" class="dash-aba" data-aba="widgets" aria-controls="widgets" aria-selected="true"><i class="ti ti-layout-dashboard" aria-hidden="true"></i> Painel</button>
+          <button type="button" role="tab" id="aba-metas" class="dash-aba" data-aba="metas" aria-controls="tela-indicadores" aria-selected="false" tabindex="-1"><i class="ti ti-target-arrow" aria-hidden="true"></i> Metas e fichas</button>
+        </div>
+        <button type="button" class="btn-sec" id="dash-editar" aria-pressed="false" title="Arrastar, redimensionar e ocultar widgets direto no painel"><i class="ti ti-layout-board-split" aria-hidden="true"></i> <span class="rot">Editar painel</span></button>
+        <button type="button" class="btn-sec" id="dash-configurar"><i class="ti ti-adjustments" aria-hidden="true"></i> <span class="rot">Configurar widgets</span></button>
+        <button type="button" class="btn-sec" id="dash-fechar" aria-label="Voltar ao mapa" aria-keyshortcuts="Escape" title="Voltar ao mapa (Esc)"><i class="ti ti-map-2" aria-hidden="true"></i> <span class="rot">Voltar ao mapa</span><kbd class="dash-esc" aria-hidden="true">Esc</kbd></button>
+      </header>
+      <div id="widgets" class="widgets" role="tabpanel" aria-labelledby="aba-widgets"></div>
+      <div id="tela-indicadores" class="dash-metas" role="tabpanel" aria-labelledby="aba-metas" hidden></div>
+    </main>
+    <!-- Detalhes de um widget: o cartão mostra o resumo; a lista completa abre aqui. -->
+    <dialog id="w-modal" class="w-modal" aria-labelledby="w-modal-titulo">
+      <header class="w-modal-cab"><h2 id="w-modal-titulo"></h2><button type="button" class="gaveta-x" data-fechar-modal aria-label="Fechar os detalhes"><i class="ti ti-x" aria-hidden="true"></i></button></header>
+      <div class="w-modal-corpo"></div>
+    </dialog>
+
+    <!-- Telas sem mapa: num painel sobre o mapa esmaecido. -->
+    <section id="sobre" class="sobre vidro" aria-label="Tela" hidden>
+      <button type="button" id="sobre-fechar" class="sobre-fechar btn-vidro" title="Voltar ao mapa (Esc)"><i class="ti ti-x" aria-hidden="true"></i><span class="sobre-fechar-rotulo">Voltar ao mapa</span></button>
+      <div id="esqueleto" class="esqueleto" aria-hidden="true" hidden>
+        <div class="esq-linha"><i></i><i></i><i></i><i></i></div>
+        <div class="esq-bloco grande"></div>
+        <div class="esq-linha dupla"><i></i><i></i></div>
+      </div>
+      <div id="tela-relatorios" class="tela tela-rolagem" hidden></div>
+      <div id="tela-alertas" class="tela tela-rolagem" hidden></div>
+      <div id="tela-dados" class="tela tela-rolagem" hidden></div>
+      <div id="tela-secretarias" class="tela tela-rolagem" hidden></div>
+      <div id="tela-secretaria" class="tela tela-rolagem" hidden></div>
+      <div id="tela-crise" class="tela tela-rolagem" hidden></div>
+      <div id="tela-cruzamento" class="tela tela-rolagem" hidden></div>
+      <div id="tela-admin" class="tela tela-rolagem" hidden></div>
+      <div id="tela-personalizar" class="tela tela-rolagem" hidden></div>
+    </section>
+
+    <!-- Gavetas pela direita: uma por vez, por cima de tudo (Alertas, Filtros, Widgets, Visualizações, Copiloto, detalhe). -->
+    <aside id="gavetas" class="gavetas vidro" aria-label="Gaveta" hidden>
+      <section id="gaveta-atencao" class="gaveta-painel" data-gaveta="atencao" aria-label="Alertas" hidden></section>
+      <section id="gaveta-filtros" class="gaveta-painel" data-gaveta="filtros" aria-label="Filtros" hidden>
+        <header class="gaveta-cab">
+          <div><h2><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i> Filtros</h2><p>O único lugar para filtrar: vale para o mapa, os alertas, a legenda e o dashboard.</p></div>
+          <button type="button" id="filtros-fechar" class="gaveta-x" aria-label="Fechar"><i class="ti ti-x" aria-hidden="true"></i></button>
+        </header>
+        <!-- Uma rolagem só (o rodapé fica preso embaixo). A visualização fica fora, ao lado da busca. -->
+        <div class="filtros-rolagem">
+          <div id="filtros-corpo" class="filtros-corpo"></div>
+        </div>
+      </section>
+      <section id="gaveta-widgets" class="gaveta-painel" data-gaveta="widgets" aria-label="Widgets" hidden></section>
+      <section id="gaveta-vistas" class="gaveta-painel" data-gaveta="vistas" aria-label="Visualizações" hidden></section>
+      <section id="gaveta-copiloto" class="gaveta-painel chat" data-gaveta="copiloto" aria-label="Assistente de IA" data-marca-attr="aria-label:{agente}" hidden>
+        <header class="chat-topo">
+          <div>
+            <h2><i class="ic-copiloto ic-ia" aria-hidden="true"></i> <span data-marca="agente">Áurea</span></h2>
+            <p>IA da Prefeitura · dados em tempo real</p>
+          </div>
+          <button type="button" id="btn-recolher-chat" class="gaveta-x" aria-label="Fechar a assistente" data-marca-attr="aria-label:Fechar {agente}"><i class="ti ti-x" aria-hidden="true"></i></button>
+        </header>
+        <div id="chat-mensagens" class="chat-mensagens" aria-live="polite"></div>
+        <div id="chat-sugestoes" class="chat-sugestoes"></div>
+        <form id="chat-form" class="chat-form" autocomplete="off">
+          <input id="chat-input" type="text" placeholder="Pergunte sobre a cidade…" aria-label="Pergunta para a IA">
+          <button type="submit" aria-label="Enviar"><i class="ti ti-send-2" aria-hidden="true"></i></button>
+        </form>
+      </section>
+      <section id="gaveta-info" class="gaveta-painel gaveta-info" data-gaveta="info" aria-label="Detalhes" hidden></section>
+      <aside id="gaveta" class="gaveta gaveta-painel" data-gaveta="alerta" aria-label="Detalhes do alerta" hidden></aside>
+    </aside>
+  </div>
+
+  <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="js/icones.js"></script>
+  <script src="js/relogio.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/data-alertas.js"></script>
+  <script src="js/data-leitos.js"></script>
+  <script src="js/data-seguranca.js"></script>
+  <script src="js/data-risco.js"></script>
+  <script src="js/data-obras.js"></script>
+  <script src="js/data-educacao.js"></script>
+  <script src="js/data-frota.js"></script>
+  <script src="js/data-coleta.js"></script>
+  <script src="js/data-medicamentos.js"></script>
+  <script src="js/data-social.js"></script>
+  <script src="js/cidade.js"></script>
+  <script src="js/data-gestao.js"></script>
+  <script src="js/data-secretarias.js"></script>
+  <script src="js/data-cruzamento.js"></script>
+  <script src="js/cruzamento.js"></script>
+  <script src="js/gestao-config.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/perfil.js"></script>
+  <script src="js/foco.js"></script>
+  <script src="js/visualizacoes.js"></script>
+  <script src="js/widgets-ia.js"></script>
+  <script src="js/contrato.js"></script>
+  <script src="js/ia-roteiro.js"></script>
+  <script src="js/ia-acoes.js"></script>
+  <script src="js/mapa-logica.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/desempenho.js"></script>
+  <script src="js/decisao.js"></script>
+  <script src="js/gaveta.js"></script>
+  <script src="js/gavetas.js"></script>
+  <script src="js/filtros.js"></script>
+  <script src="js/busca.js"></script>
+  <script src="js/widgets-extra.js"></script>
+  <script src="js/widgets.js"></script>
+  <script src="js/relatorios.js"></script>
+  <script src="js/tela-relatorios.js"></script>
+  <script src="js/tela-alertas.js"></script>
+  <script src="js/dados.js"></script>
+  <script src="js/tela-dados.js"></script>
+  <script src="js/tela-secretaria.js"></script>
+  <script src="js/tela-secretarias.js"></script>
+  <script src="js/crise.js"></script>
+  <script src="js/tela-crise.js"></script>
+  <script src="js/resumo-dia.js"></script>
+  <script src="js/resumo-semana.js"></script>
+  <script src="js/indicadores.js"></script>
+  <script src="js/tela-indicadores.js"></script>
+  <script src="js/rotas.js"></script>
+  <script src="js/painel-bairro.js"></script>
+  <script src="js/linha-tempo.js"></script>
+  <script src="js/modos-mapa.js"></script>
+  <script src="js/consistencia.js"></script>
+  <script src="js/tela-admin.js"></script>
+  <script src="js/tela-cruzamento.js"></script>
+  <script src="js/tela-personalizar.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/tour.js"></script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!doctype html>
+<html data-portal="cidadao" lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#1e3a5f" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b1626" media="(prefers-color-scheme: dark)">
+  <title>Vila Dourada · Prefeitura</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="css/cidadao.css">
+  <link rel="stylesheet" href="css/golden.css">
+</head>
+<!-- Portal do Cidadão: página própria, separada do painel do gestor (index.html). Só carrega dados públicos e
+     o que o morador usa; nada de alertas, prazos, responsáveis, Copiloto ou camadas sensíveis. -->
+<body data-pagina="cidadao">
+  <a class="p-pular" href="#conteudo">Pular para o conteúdo</a>
+  <header class="p-topo">
+    <div class="p-topo-in">
+      <a class="p-marca" href="#/inicio" aria-label="Início">
+        <span class="p-marca-ic" data-marca-icone aria-hidden="true"><i class="ti ti-building-community"></i></span>
+        <span><small>Prefeitura de</small> <b id="p-cidade">Vila Dourada</b></span>
+      </a>
+      <div class="p-topo-acoes">
+        <button type="button" id="p-meu-bairro" class="p-chip" aria-haspopup="dialog"><i class="ti ti-map-pin" aria-hidden="true"></i> <span id="p-meu-bairro-nome">Escolha seu bairro</span></button>
+        <button type="button" id="p-demo" class="p-chip p-chip-demo" aria-haspopup="dialog" title="Modo demonstração: trocar de perfil ou de cidade"><i class="ti ti-presentation" aria-hidden="true"></i> <span class="p-rot">Demonstração</span></button>
+      </div>
+    </div>
+    <nav class="p-abas" aria-label="Seções do portal">
+      <div class="p-abas-in" id="p-abas"></div>
+    </nav>
+  </header>
+
+  <main id="conteudo" class="p-conteudo" tabindex="-1">
+    <section id="aba-inicio" class="p-aba" aria-labelledby="t-inicio" hidden>
+      <!-- Abertura: saudação pela hora do dia, data e a busca única. -->
+      <div class="p-hero">
+        <p class="p-hero-data" id="p-hero-data"></p>
+        <h1 id="t-inicio">Bom ver você por aqui</h1>
+        <p id="p-inicio-sub" class="p-hero-sub">O que importa hoje, com os dados de agora.</p>
+        <!-- Busca única (fica fora do trecho que se atualiza sozinho: o que a pessoa digitou não se perde). -->
+        <div class="p-busca-geral" role="search">
+          <label class="p-busca"><i class="ti ti-search" aria-hidden="true"></i><span class="p-so-leitor">Buscar no portal</span>
+            <input type="search" id="p-busca-geral" placeholder="O que você procura? Bairro, creche, lixo, 199…" autocomplete="off" aria-controls="p-resultados" aria-describedby="p-res-info"></label>
+          <p id="p-res-info" class="p-so-leitor" aria-live="polite"></p>
+          <ul id="p-resultados" class="p-resultados" aria-label="Resultados da busca" hidden></ul>
+        </div>
+      </div>
+      <div id="inicio-corpo" class="p-aba-corpo"></div>
+    </section>
+    <section id="aba-bairro" class="p-aba" aria-labelledby="t-bairro" hidden></section>
+    <section id="aba-mapa" class="p-aba p-aba-mapa" aria-labelledby="t-mapa" hidden>
+      <div class="p-cab"><h1 id="t-mapa">Mapa da cidade</h1><p>Toque num bairro para ver o que acontece nele.</p></div>
+      <div class="p-camadas" role="group" aria-label="Mostrar no mapa" id="p-camadas"></div>
+      <div class="p-mapa-caixa">
+        <div id="p-mapa" class="p-mapa" role="region" aria-label="Mapa interativo da cidade"></div>
+        <!-- Legenda dentro do mapa, recolhível (no celular, fora do mapa ela ficava atrás das abas). -->
+        <details class="p-legenda-caixa" id="p-legenda-caixa">
+          <summary><i class="ti ti-list" aria-hidden="true"></i> Legenda</summary>
+          <ul class="p-legenda" aria-label="Legenda do mapa">
+            <li><span class="p-pino-mini urgente" aria-hidden="true"></span> Aviso urgente</li>
+            <li><span class="p-pino-mini atencao" aria-hidden="true"></span> Aviso de atenção</li>
+            <li><span class="p-area-mini" aria-hidden="true"></span> Área de risco</li>
+            <li><span class="p-pino-mini saude" aria-hidden="true"></span> Hospital ou UPA</li>
+            <li><span class="p-pino-mini escolas" aria-hidden="true"></span> Escola</li>
+            <li><span class="p-pino-mini obras" aria-hidden="true"></span> Obra</li>
+            <li><span class="p-grupo-mini" aria-hidden="true">3</span> Vários pontos juntos</li>
+          </ul>
+        </details>
+      </div>
+      <div id="p-mapa-bairro" class="p-mapa-bairro" aria-live="polite"></div>
+    </section>
+    <section id="aba-servicos" class="p-aba" aria-labelledby="t-servicos" hidden></section>
+    <section id="aba-numeros" class="p-aba" aria-labelledby="t-numeros" hidden></section>
+  </main>
+
+  <footer class="p-rodape">
+    <p><b id="p-cidade-rodape">Vila Dourada</b> é uma cidade fictícia: os dados deste portal são de demonstração.</p>
+  </footer>
+
+  <!-- Avisos novos para quem usa leitor de tela (o resto da página não fica falando sozinho). -->
+  <div id="p-anuncio" class="p-so-leitor" role="status" aria-live="polite"></div>
+  <div id="p-toast" class="p-toast" role="status" aria-live="polite" hidden></div>
+
+  <dialog id="p-dlg-bairro" class="p-dlg" aria-labelledby="p-dlg-bairro-t">
+    <form method="dialog">
+      <h2 id="p-dlg-bairro-t">Qual é o seu bairro?</h2>
+      <p>Assim o portal mostra primeiro os avisos e os serviços perto de você. Fica salvo só neste aparelho.</p>
+      <button type="button" id="p-geo" class="p-btn p-btn-sec"><i class="ti ti-current-location" aria-hidden="true"></i> Usar minha localização</button>
+      <p id="p-geo-msg" class="p-geo-msg" role="status"></p>
+      <label class="p-campo">Bairro <select id="p-sel-bairro" required></select></label>
+      <div class="p-dlg-acoes">
+        <button type="submit" value="cancelar" class="p-btn p-btn-sec" formnovalidate>Agora não</button>
+        <button type="submit" value="ok" class="p-btn">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Compartilhar quando o aparelho não tem a janela de compartilhar nem deixa copiar sozinho. -->
+  <dialog id="p-dlg-compartilhar" class="p-dlg" aria-labelledby="p-dlg-comp-t">
+    <form method="dialog">
+      <h2 id="p-dlg-comp-t"><i class="ti ti-share" aria-hidden="true"></i> Compartilhar aviso</h2>
+      <label class="p-campo">Texto do aviso <textarea id="p-comp-texto" rows="7" readonly></textarea></label>
+      <div class="p-dlg-acoes">
+        <button type="submit" value="fechar" class="p-btn p-btn-sec">Fechar</button>
+        <button type="button" id="p-comp-copiar" class="p-btn p-btn-sec"><i class="ti ti-copy" aria-hidden="true"></i> Copiar</button>
+        <a id="p-comp-whats" class="p-btn" target="_blank" rel="noopener"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> Enviar pelo WhatsApp</a>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="p-dlg-demo" class="p-dlg" aria-labelledby="p-dlg-demo-t">
+    <form method="dialog">
+      <h2 id="p-dlg-demo-t"><i class="ti ti-presentation" aria-hidden="true"></i> Modo demonstração</h2>
+      <p>Só para a apresentação: num portal de verdade, o cidadão não vê esta opção e o gestor entra com login.</p>
+      <label class="p-campo">Ver como <select id="p-sel-perfil"></select></label>
+      <label class="p-campo">Cidade da demonstração <select id="p-sel-cidade"></select></label>
+      <div class="p-dlg-acoes">
+        <button type="submit" value="cancelar" class="p-btn p-btn-sec">Fechar</button>
+        <button type="submit" value="ok" class="p-btn">Trocar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+  <script src="js/marca-config.js"></script>
+  <script src="js/marca.js"></script>
+  <script src="js/relogio.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/data-alertas.js"></script>
+  <script src="js/data-leitos.js"></script>
+  <script src="js/data-seguranca.js"></script>
+  <script src="js/data-risco.js"></script>
+  <script src="js/data-obras.js"></script>
+  <script src="js/data-educacao.js"></script>
+  <script src="js/data-frota.js"></script>
+  <script src="js/data-coleta.js"></script>
+  <script src="js/data-medicamentos.js"></script>
+  <script src="js/cidade.js"></script>
+  <script src="js/data-secretarias.js"></script>
+  <script src="js/contrato.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/perfil.js"></script>
+  <script src="js/crise.js"></script>
+  <script src="js/indicadores.js"></script>
+  <script src="js/mapa-logica.js"></script>
+  <script src="js/tela-cidadao.js"></script>
+  <script src="js/mapa-cidadao.js"></script>
+  <script src="js/portal-cidadao.js"></script>
+</body>
+</html>

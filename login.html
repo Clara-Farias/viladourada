@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrar · Golden Gov</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/golden.css">
+  <script src="js/marca-config.js"></script>
+  <script src="js/marca.js"></script>
+  <script src="js/sessao.js"></script>
+  <script src="js/gestao-config.js"></script>
+</head>
+<body class="pagina-login">
+  <main class="login">
+    <section class="login-marca" aria-label="Sobre o produto">
+      <div class="login-topo"><span data-marca-logo="logo-grande"></span><b data-marca="produto">Golden Gov</b></div>
+      <div class="login-chamada">
+        <h1>A cidade inteira numa tela, com o que precisa de você primeiro.</h1>
+        <ul>
+          <li><i class="ti ti-map-2" aria-hidden="true"></i> Ocorrências, obras, saúde e segurança no mesmo mapa</li>
+          <li><i class="ti ti-bell-ringing" aria-hidden="true"></i> Alertas que já chegam à secretaria certa, com prazo</li>
+          <li><i class="ti ti-sparkles" aria-hidden="true"></i> <span><span data-marca="agente">Áurea</span>, a assistente de IA que cruza os dados da prefeitura</span></li>
+        </ul>
+      </div>
+      <p class="login-rodape">GoldenCloud · ambiente de demonstração com dados fictícios</p>
+    </section>
+
+    <section class="login-form-area">
+      <form id="login-form" class="login-cartao" autocomplete="on">
+        <h2>Entrar</h2>
+        <p class="login-sub">Use o e-mail da prefeitura.</p>
+        <label>E-mail <input id="login-email" type="email" required placeholder="nome@prefeitura.gov.br" autocomplete="username"></label>
+        <label>Senha <input id="login-senha" type="password" required placeholder="••••••••" autocomplete="current-password"></label>
+        <label>Acessar como
+          <select id="login-perfil">
+            <option value="prefeito">Prefeito(a) · Gabinete (visão geral)</option>
+            <optgroup label="Secretarias (módulos)">
+              <option value="setor:saude">Secretaria de Saúde</option>
+              <option value="setor:infraestrutura">Secretaria de Obras e Infraestrutura</option>
+              <option value="setor:educacao">Secretaria de Educação</option>
+              <option value="setor:defesa_civil">Defesa Civil</option>
+              <option value="setor:seguranca">Secretaria de Segurança</option>
+              <option value="setor:mobilidade">Secretaria de Mobilidade</option>
+              <option value="setor:limpeza">Limpeza Urbana</option>
+            </optgroup>
+          </select></label>
+        <label>Cidade da demonstração
+          <select id="login-cidade">
+            <option value="pequena">Arraial do Sol · 22 mil habitantes</option>
+            <option value="media" selected>Vila Dourada · 250 mil habitantes</option>
+            <option value="grande">Nova Aurora · 2,5 milhões de habitantes</option>
+          </select></label>
+        <div class="login-linha">
+          <label class="login-check"><input id="login-lembrar" type="checkbox"> Manter conectado</label>
+          <button type="button" id="login-esqueci" class="login-link">Esqueci a senha</button>
+        </div>
+        <p id="login-aviso" class="login-aviso" role="status" hidden></p>
+        <button type="submit" class="login-entrar">Entrar <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+        <a class="login-cidadao" href="cidadao.html"><i class="ti ti-users" aria-hidden="true"></i> Sou cidadão: abrir o portal (sem login)</a>
+      </form>
+    </section>
+  </main>
+  <script src="js/login.js"></script>
+</body>
+</html>
