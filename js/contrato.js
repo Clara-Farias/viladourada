@@ -6,7 +6,11 @@
   const TIPOS_MAPA = ['calor', 'destaque'];
   const NIVEIS = ['alta', 'media', 'baixa'];
   const textoAte = (t, max) => typeof t === 'string' && t.trim().length > 0 && t.length <= max;
-  const TIPOS_ACAO = ['mostrarMapa', 'agir', 'focarOcorrencia', 'perguntar', 'criarAlerta', 'abrirCamada'];
+  const TIPOS_ACAO = ['mostrarMapa', 'agir', 'focarOcorrencia', 'perguntar', 'criarAlerta', 'abrirCamada', 'abrirTela'];
+  // Documentos gerados pelos modelos (js/modelos.js): prévia na conversa e arquivos para baixar.
+  const TIPOS_PREVIA = ['imagem', 'texto', 'audio'];
+  const previaValida = (p) => !!p && TIPOS_PREVIA.includes(p.tipo) && (p.tipo === 'imagem' ? typeof p.src === 'string' && /^data:image\//.test(p.src) : typeof p.texto === 'string' && p.texto.length <= 20000);
+  const arquivosValidos = (l) => Array.isArray(l) && l.length <= 6 && l.every((a) => a && typeof a.rotulo === 'string' && typeof a.nome === 'string' && /^[\w.-]+$/.test(a.nome) && typeof a.criar === 'function');
   // Camadas fixas do mapa que uma resposta pode ligar (e, com id, focar num ponto delas).
   const CAMADAS = ['leitos', 'risco', 'obras', 'escolas', 'calor-bo', 'frota', 'coleta', 'farmacias'];
   const ACOES_PREFEITO = ['cobrar', 'priorizar', 'gabinete'];
@@ -52,6 +56,7 @@
     if (r.acoes !== undefined && !Array.isArray(r.acoes)) erros.push('acoes não é lista');
     (Array.isArray(r.acoes) ? r.acoes : []).forEach((a, i) => {
       if (!a || !a.rotulo || !TIPOS_ACAO.includes(a.tipo) || !a.payload || typeof a.payload !== 'object') erros.push(`acoes[${i}] inválida`);
+      else if (a.tipo === 'abrirTela' && (!a.payload.rota || typeof a.payload.rota.tela !== 'string')) erros.push(`acoes[${i}] abrirTela inválida`);
       else if (a.tipo === 'agir' && (typeof a.payload.ocorrenciaId !== 'string' || !ACOES_PREFEITO.includes(a.payload.acao))) erros.push(`acoes[${i}] agir inválida`);
       else if (a.tipo === 'criarAlerta' && !alertaValido(a.payload)) erros.push(`acoes[${i}] criarAlerta inválida`);
       else if (a.tipo === 'abrirCamada' && (!CAMADAS.includes(a.payload.camada) || (a.payload.id !== undefined && !textoAte(a.payload.id, 120)))) erros.push(`acoes[${i}] abrirCamada inválida`);
@@ -67,6 +72,8 @@
     if (r.cenario) out.cenario = r.cenario;
     if (r.grafico && !GC.validarResposta({ texto: 'x', grafico: r.grafico }).length) out.grafico = r.grafico;
     if (r.mapa && !GC.validarResposta({ texto: 'x', mapa: r.mapa }).length) out.mapa = r.mapa;
+    if (previaValida(r.previa)) out.previa = r.previa;
+    if (arquivosValidos(r.arquivos)) out.arquivos = r.arquivos;
     ['fontes', 'confiabilidade', 'consulta', 'base'].forEach((campo) => {
       if (r[campo] !== undefined && !GC.validarResposta({ texto: 'x', [campo]: r[campo] }).length) out[campo] = r[campo];
     });

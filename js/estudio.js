@@ -165,7 +165,7 @@
   });
 
   // ---- a tela ----
-  GC.criarTelaEstudio = function (el, { store, aoIr }) {
+  GC.criarTelaEstudio = function (el, { store, aoIr, aoPerguntar }) {
     const ctx = { store };
     let atual = { modelo: MODELOS[0].id, alvo: null };
 
@@ -175,7 +175,7 @@
       if (!alvos.some((a) => a.id === atual.alvo)) atual.alvo = alvos[0] ? alvos[0].id : null;
       const g = GC.gerarImagem(md.id, atual.alvo, ctx);
       el.innerHTML = `
-        <header class="sec-topo"><div><h2>🖼 Estúdio</h2><p>Imagens prontas a partir de modelos: escolha o modelo e o assunto; os números vêm da base e as cores e o logo, da marca.</p></div></header>
+        <header class="sec-topo"><div><h2>🖼 Editor de cards</h2><p><a href="#/estudio">← Todos os modelos</a> · Imagens prontas a partir de modelos: escolha o modelo e o assunto; os números vêm da base e as cores e o logo, da marca.</p></div></header>
         <div class="es-grade">
           <section class="rel-cartao es-lado">
             <h3>Modelo</h3>
@@ -194,6 +194,25 @@
     }
     function baixar(nome, url) { const a = document.createElement('a'); a.href = url; a.download = nome; a.click(); }
 
-    return { mostrar(rota) { atual = { modelo: rota.modelo || MODELOS[0].id, alvo: rota.alvo || null }; desenhar(); } };
+    // Catálogo: tudo o que a assistente gera, com um pedido de exemplo para cada modelo.
+    function catalogo() {
+      const lista = GC.modelos ? GC.modelos.lista : [];
+      const ag = GC.agente ? GC.agente() : 'assistente';
+      el.innerHTML = `
+        <header class="sec-topo"><div><h2>🖼 Estúdio</h2><p>Peça à ${esc(ag)} com suas palavras: ela escolhe o modelo, preenche com os dados da base e devolve o arquivo pronto, na identidade da prefeitura.</p></div></header>
+        <div class="es-catalogo">${lista.map((m) => `<article class="es-cartao">
+          <div class="es-cartao-topo"><span class="es-ic" aria-hidden="true">${m.icone}</span><span class="es-formato">${esc(m.formato)}</span></div>
+          <h3>${esc(m.nome)}</h3><p>${esc(m.descricao)}</p>
+          <p class="es-exemplo">“${esc(m.exemplo)}”</p>
+          <div class="es-cartao-acoes"><button type="button" class="btn-sec principal" data-es-pedir="${esc(m.exemplo)}">Pedir à ${esc(ag)}</button>
+          ${m.id === 'card' ? '<button type="button" class="btn-sec" data-es-editor>Abrir editor de cards</button>' : ''}</div></article>`).join('')}</div>`;
+      el.querySelectorAll('[data-es-pedir]').forEach((b) => { b.onclick = () => aoPerguntar && aoPerguntar(b.dataset.esPedir); });
+      const ed = el.querySelector('[data-es-editor]'); if (ed) ed.onclick = () => aoIr({ tela: 'estudio', modelo: MODELOS[0].id });
+    }
+
+    return { mostrar(rota) {
+      if (!rota.modelo || !MODELOS.some((x) => x.id === rota.modelo)) { catalogo(); return; }
+      atual = { modelo: rota.modelo, alvo: rota.alvo || null }; desenhar();
+    } };
   };
 })(window.GC = window.GC || {});

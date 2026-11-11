@@ -18,6 +18,7 @@
     return [
       { rotulo: '📄 Gerar relatório', texto: setor ? 'Gerar o relatório da minha secretaria' : 'Gerar o relatório executivo' },
       ...(pronto ? [{ rotulo: '🔀 Cruzar dados', texto: `Cruze ${GC.cruzamento.indicador(pronto.a).nome.toLowerCase()} com ${GC.cruzamento.indicador(pronto.b).nome.toLowerCase()} nos últimos 3 meses por região` }] : []),
+      ...(GC.modelos && !setor ? [{ rotulo: '🗂 Gerar documento', texto: 'Quais modelos você gera?' }] : []),
       { rotulo: '⏱ O que fazer primeiro', texto: 'O que devo fazer primeiro?' },
       ...(setor ? [] : [{ rotulo: '📍 Bairro mais crítico', texto: 'Qual bairro está pior hoje?' }]),
       { rotulo: '🗓 Resumo da semana', texto: 'Resumo da semana' },
@@ -133,6 +134,9 @@
   const EH_CRUZAR = /\bcruz|correlac|relacao entre|versus|\bvs\b| x |compar(e|ar) .+ com/;
   GC.ia.perguntar = function (texto, contexto = {}) {
     const q = ` ${norm(texto)} `;
+    // Modelos de documentos (briefing, prestação de contas, card, gráfico, slides, pauta, áudio, FAQ, Excel).
+    const doc = GC.modelos && GC.storeAtual ? GC.modelos.responder(texto) : null;
+    if (doc) return doc;
     if (GC.MODELOS_ESTUDIO && /\b(card|post|postagem|imagem|arte|banner)\b/.test(q)) return imagem(texto);
     if (GC.cruzamento && EH_CRUZAR.test(q)) return cruzar(texto, contexto);
     if (/\b(gerar|gere|montar|monte|fazer|faca)\b.*relatorio|^ relatorio /.test(q)) return relatorio(contexto);

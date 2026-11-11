@@ -43,6 +43,7 @@
     const daPasta = (o) => !areasPerfil || areasPerfil.includes(o.area);
     corpo.classList.add(`perfil-${perfil.id}`);
     const store = GC.criarStore(GC.data);
+    GC.storeAtual = store; // os modelos de documentos (js/modelos.js) leem os mesmos números das telas
     // Toda ação do prefeito vai para o registro; a cobrança sai com o aviso (SMS/WhatsApp) e o prazo de resposta.
     const agirNaStore = store.agir;
     store.agir = (id, tipo) => {
@@ -703,7 +704,7 @@
       aoPerguntar: (texto) => { abrirCopiloto(); perguntar(texto); },
     });
     const telaPersonalizar = GC.criarTelaPersonalizar($('tela-personalizar'));
-    const telaEstudio = GC.criarTelaEstudio($('tela-estudio'), { store, aoIr: (r) => rotas.ir(r) });
+    const telaEstudio = GC.criarTelaEstudio($('tela-estudio'), { store, aoIr: (r) => rotas.ir(r), aoPerguntar: (texto) => { abrirCopiloto(); perguntar(texto); } });
     const telaAdmin = GC.criarTelaAdmin($('tela-admin'), {
       store,
       aoIr: (r, ocorrenciaId) => { rotas.ir(r); if (ocorrenciaId) noPainel(() => focar(ocorrenciaId)); },

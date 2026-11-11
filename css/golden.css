@@ -292,3 +292,22 @@
 .es-quadro { max-width: 620px; margin: 0 auto; border-radius: 14px; overflow: hidden; box-shadow: 0 14px 34px rgba(15, 23, 42, 0.18); }
 .es-quadro svg { width: 100%; height: auto; display: block; }
 @media (max-width: 900px) { .es-grade { grid-template-columns: 1fr; } .es-previa { position: static; } }
+
+/* ---------- Documentos gerados no chat ---------- */
+.previa-img { display: block; width: 100%; max-width: 360px; margin-top: 10px; border-radius: 10px; box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16); }
+.previa-texto { margin-top: 10px; max-height: 260px; overflow: auto; white-space: pre-line; font-size: 13px; line-height: 1.45; padding: 10px; border-radius: 10px; background: var(--navy-claro); border: 1px solid var(--borda); }
+.previa-audio { display: flex; gap: 8px; margin-top: 10px; }
+.btn-audio { font: inherit; font-size: 13px; font-weight: 600; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--ia-suave); background: var(--ia-claro); color: var(--ia-texto); cursor: pointer; }
+.acoes.arquivos .btn-arquivo { background: var(--navy); color: var(--sobre-navy); border-color: var(--navy); }
+.acoes.arquivos .btn-arquivo:disabled { opacity: 0.7; cursor: progress; }
+/* Estúdio: catálogo */
+.es-catalogo { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.es-cartao { display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 14px; border: 1px solid var(--borda); background: var(--cartao); }
+.es-cartao-topo { display: flex; justify-content: space-between; align-items: center; }
+.es-ic { font-size: 26px; }
+.es-formato { font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--navy-claro); color: var(--navy-texto); }
+.es-cartao h3 { margin: 4px 0 0; font-size: 15.5px; }
+.es-cartao p { margin: 0; font-size: 13px; color: var(--suave); line-height: 1.45; }
+.es-cartao .es-exemplo { color: var(--texto); font-style: italic; }
+.es-cartao-acoes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 8px; }
+.acoes.arquivos .btn-arquivo:hover, .acoes.arquivos .btn-arquivo:focus-visible { background: var(--navy-escuro); color: var(--sobre-escuro); border-color: var(--navy-escuro); }

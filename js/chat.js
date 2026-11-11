@@ -295,6 +295,8 @@
         msg.querySelector('.digitando').remove();
         texto(msg, resposta.texto);
         if (resposta.grafico) renderGrafico(msg, resposta.grafico);
+        if (resposta.previa) renderPrevia(msg, resposta.previa);
+        if (resposta.arquivos && resposta.arquivos.length) renderArquivos(msg, resposta.arquivos);
         if (resposta.fontes || resposta.grafico) botaoPdf(msg, (canvas) => GC.exportarRespostaPdf({ pergunta, resposta, canvas }));
         const fixavel = resposta.grafico && pergunta && aoFixarWidget;
         if ((resposta.acoes && resposta.acoes.length) || fixavel) {
@@ -318,6 +320,49 @@
         setTimeout(() => { redimensionarGraficos(); mostrarDoInicio(ancora); }, 750);
         return resposta;
       });
+    }
+
+    // Documentos gerados pelos modelos (js/modelos.js): prévia na própria conversa e botões de download.
+    function renderPrevia(msg, p) {
+      if (p.tipo === 'imagem') {
+        const img = document.createElement('img'); img.className = 'previa-img'; img.src = p.src; img.alt = p.alt || '';
+        msg.appendChild(img);
+      } else if (p.tipo === 'texto') {
+        msg.appendChild(criar('div', 'previa-texto', p.texto));
+      } else if (p.tipo === 'audio') {
+        const box = criar('div', 'previa-audio');
+        const tocar = criar('button', 'btn-audio', '▶ Ouvir'); const parar = criar('button', 'btn-audio', '■ Parar');
+        tocar.type = 'button'; parar.type = 'button';
+        tocar.onclick = () => {
+          if (!('speechSynthesis' in window)) { tocar.textContent = 'Este navegador não lê em voz alta'; return; }
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(p.texto); u.lang = 'pt-BR'; u.rate = 1.02;
+          const voz = window.speechSynthesis.getVoices().find((v) => /pt[-_]BR/i.test(v.lang)); if (voz) u.voice = voz;
+          window.speechSynthesis.speak(u);
+        };
+        parar.onclick = () => { if (window.speechSynthesis) window.speechSynthesis.cancel(); };
+        box.append(tocar, parar);
+        msg.appendChild(box);
+      }
+    }
+    function renderArquivos(msg, arquivos) {
+      const box = criar('div', 'acoes arquivos');
+      arquivos.forEach((a) => {
+        const b = criar('button', 'btn-arquivo', a.rotulo); b.type = 'button';
+        b.onclick = async () => {
+          b.disabled = true; b.textContent = 'Gerando…';
+          try {
+            const blob = await a.criar();
+            const url = URL.createObjectURL(blob); const l = document.createElement('a');
+            l.href = url; l.download = a.nome; document.body.appendChild(l); l.click(); l.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 4000);
+            b.textContent = `✓ ${a.nome}`;
+          } catch (e) { b.textContent = 'Não deu para gerar agora · tentar de novo'; }
+          b.disabled = false;
+        };
+        box.appendChild(b);
+      });
+      msg.appendChild(box);
     }
 
     // "▦ Fixar como widget": cria (ou reencontra) o widget; depois o botão leva até ele no dashboard.

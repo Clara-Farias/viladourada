@@ -6,7 +6,7 @@
   // Em atributos (title, aria-label, placeholder) e no título da aba, o emoji só é removido.
   const ICONES = {
     // navegação e telas
-    '🖼': 'photo', 'ℹ': 'info-circle', '🧪': 'flask', '🧩': 'puzzle', '🗒': 'notes', '⚙': 'settings', '🔑': 'key', '🚪': 'logout',
+    '🖼': 'photo', '🎞': 'presentation', '🔊': 'volume', 'ℹ': 'info-circle', '🧪': 'flask', '🧩': 'puzzle', '🗒': 'notes', '⚙': 'settings', '🔑': 'key', '🚪': 'logout',
     '🔀': 'arrows-shuffle', '🎨': 'palette', '🗓': 'calendar-week', '⬆': 'upload',
     '🗺': 'map-2', '📄': 'file-text', '🔔': 'bell', '🔕': 'bell-off', '🗄': 'database', '📊': 'chart-bar',
     '📍': 'map-pin', '📋': 'clipboard-list', '📚': 'books', '📘': 'book-2', '⬇': 'download', '🗂': 'stack-2',
