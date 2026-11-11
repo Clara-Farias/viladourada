@@ -1,0 +1,39 @@
+/* Widgets fixados do Copiloto (js/widgets-ia.js) e o botão "▦ Fixar como widget" na resposta. */
+
+/* Botão na resposta: o mesmo chip das ações, com um toque a mais (é a ação que leva ao dashboard). */
+.msg .acoes .btn-fixar-widget { border-style: dashed; background: #fff; }
+.msg .acoes .btn-fixar-widget.feito { border-style: solid; background: #ecfdf5; border-color: #a7f3d0; color: #047857; }
+.msg .acoes .btn-fixar-widget.feito:hover { background: #d1fae5; }
+
+/* No dashboard: borda roxa discreta, como tudo que vem da IA. */
+.widget[data-widget^="ia-"] { border-top: 3px solid var(--ia); }
+.widget[data-widget^="ia-"] h3 { color: var(--ia-texto); }
+.w-ia-titulo { margin: -4px 0 8px; font-size: 12px; color: var(--suave); }
+
+.w-ia-barras .w-ia-linha {
+  display: grid; grid-template-columns: minmax(110px, 40%) 1fr 64px; align-items: center; gap: 10px;
+  padding: 4px 6px; border-radius: 8px; font-size: 13px;
+}
+.w-ia-barras .w-ia-linha span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.w-ia-barras .w-ia-linha small { display: block; font-size: 11px; color: var(--suave); }
+.w-ia-barras i::after { background: #a5b4c8; }
+.w-ia-barras i.topo::after { background: var(--ia); }
+
+.w-ia-destaque { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.w-ia-destaque b { font-size: 22px; color: var(--navy-texto); font-variant-numeric: tabular-nums; }
+.w-ia-destaque small { font-size: 12px; color: var(--suave); }
+.w-ia-linha-fig { margin: 0; }
+.w-ia-linha-fig svg { display: block; width: 100%; height: 90px; overflow: visible; }
+.w-ia-linha-fig figcaption { display: flex; justify-content: space-between; font-size: 11px; color: var(--suave); }
+.w-ia-serie { fill: none; stroke: var(--ia); stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.w-ia-serie-2 { stroke: #a5b4c8; stroke-dasharray: 4 3; }
+.w-ia-ponto { fill: var(--ia); }
+
+.w-ia-pe { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #e2e8f0; font-size: 12px; color: var(--suave); }
+.w-ia-pe > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.w-ia-perguntar { flex: none; border: 1px solid var(--ia-suave); background: var(--ia-claro); color: var(--ia-texto); border-radius: 14px; padding: 3px 10px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.w-ia-perguntar:hover { background: color-mix(in srgb, var(--ia) 14%, #fff); }
+
+/* Chegada pelo "ver no dashboard": um brilho rápido em volta do widget. */
+@keyframes w-ia-brilho { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ia) 55%, transparent); } 100% { box-shadow: 0 0 0 14px color-mix(in srgb, var(--ia) 0%, transparent); } }
+.widget.w-ia-novo { animation: w-ia-brilho 0.9s ease-out 2; }

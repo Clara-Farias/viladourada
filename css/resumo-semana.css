@@ -1,0 +1,37 @@
+/* Resumo da semana (js/resumo-semana.js): mesmo cartão de vidro do Resumo do dia, na base do mapa. */
+.rs-numeros { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.rs-num { display: flex; flex-direction: column; gap: 1px; border: 1px solid rgba(148, 163, 184, 0.35); border-left: 3px solid var(--andamento); background: rgba(255, 255, 255, 0.85); border-radius: 10px; padding: 6px 9px; min-width: 0; }
+.rs-num b { font-size: 18px; line-height: 1.1; color: var(--navy-texto); font-variant-numeric: tabular-nums; }
+.rs-num small { font-size: 12px; color: var(--suave); }
+.rs-num.tom-ok { border-left-color: var(--positivo); }
+.rs-num.tom-critico { border-left-color: var(--critica); }
+
+.rs-colunas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.rs-colunas h3 { margin: 2px 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--suave); }
+.rs-lista, .rs-entregas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.rs-vazio { margin: 0; font-size: 12px; color: var(--suave); }
+
+.rs-item, .rs-entrega {
+  width: 100%; display: flex; align-items: center; gap: 8px; text-align: left; font: inherit; color: var(--texto); cursor: pointer;
+  border: 1px solid rgba(148, 163, 184, 0.35); border-left: 3px solid var(--andamento); background: rgba(255, 255, 255, 0.85); border-radius: 10px; padding: 5px 8px; min-width: 0;
+}
+.rs-item:hover, .rs-entrega:hover { background: #fff; }
+.rs-item.tom-ok { border-left-color: var(--positivo); }
+.rs-item.tom-critico { border-left-color: var(--critica); }
+.rs-item > span, .rs-entrega > span:last-child { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.rs-item b, .rs-entrega b { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rs-item small, .rs-entrega small { font-size: 12px; color: var(--suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rs-item em { flex: none; font-style: normal; font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; }
+.rs-item.tom-ok em { color: var(--positivo); }
+.rs-item.tom-critico em { color: var(--critica); }
+
+.rs-prazo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.rs-entrega { border-left-color: var(--ouro); }
+.rs-data { flex: none; font-size: 12px; font-weight: 700; color: var(--navy-texto); background: color-mix(in srgb, var(--navy) 7%, transparent); border-radius: 6px; padding: 2px 6px; font-variant-numeric: tabular-nums; }
+
+.rs-copiloto { align-self: flex-start; border: 1px solid var(--ia-suave); background: var(--ia-claro); color: var(--ia-texto); border-radius: 14px; padding: 5px 12px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.rs-copiloto:hover { background: color-mix(in srgb, var(--ia) 14%, #fff); }
+
+@media (max-width: 720px) {
+  .rs-colunas, .rs-prazo { grid-template-columns: 1fr; }
+}

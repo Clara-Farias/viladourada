@@ -1,0 +1,323 @@
+/* ============================================================
+   Mapa: entrada animada, gaveta de detalhes (ponto e bairro), atribuição sob a Legenda,
+   linha do tempo das últimas 24 h e modo telão. Carregado depois de mapa-premium.css.
+   ============================================================ */
+
+/* ---------- entrada: pinos surgem em sequência enquanto a câmera chega ---------- */
+.mapa-entrando .marcador-wrap > * {
+  animation: surgir 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+  animation-delay: var(--atraso, 0ms);
+}
+@media (prefers-reduced-motion: reduce) { .mapa-entrando .marcador-wrap > * { animation: none; } }
+
+/* ---------- atribuição: o ⓘ fica logo abaixo do botão Legenda ---------- */
+.palco .maplibregl-ctrl-bottom-left { left: auto; right: 14px; bottom: 10px; transition: right 0.26s cubic-bezier(0.4, 0, 0.2, 1); }
+.palco .maplibregl-ctrl-bottom-left .maplibregl-ctrl { margin: 0; }
+.palco .maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib.maplibregl-compact { background: var(--vidro); box-shadow: var(--vidro-sombra); }
+body[data-gaveta] .palco .maplibregl-ctrl-bottom-left { right: calc(min(var(--gaveta-w), 100vw - 24px) + 26px); }
+/* O botão "Indicadores" fica no meio, embaixo; a Legenda sobe um pouco para o ⓘ caber sob ela. */
+.palco .base-palco { bottom: 46px; }
+
+/* ---------- controles extras: cidade inteira e linha do tempo ---------- */
+.palco .maplibregl-ctrl-group button.ctrl-cidade, .palco .maplibregl-ctrl-group button.ctrl-linha-tempo { display: grid; place-items: center; }
+.ctrl-cidade .ti, .ctrl-linha-tempo .ti { font-size: 18px; color: var(--navy-texto); }
+body.com-linha-tempo .ctrl-linha-tempo { background: var(--navy) !important; }
+body.com-linha-tempo .ctrl-linha-tempo .ti { color: #fff; }
+body.mapa-escuro .ctrl-cidade .ti, body.mapa-escuro .ctrl-linha-tempo .ti { color: #e2e8f0; }
+
+/* ---------- gaveta de detalhes: popups do mapa e painel do bairro ---------- */
+.maplibregl-popup.popup-na-gaveta { visibility: hidden; pointer-events: none; }
+.gaveta-info { position: relative; padding: 18px 20px 24px; overflow-y: auto; }
+.gaveta-info .info-fechar { position: absolute; top: 12px; right: 12px; z-index: 1; }
+.gaveta-info .popup { font-size: 14px; }
+.gaveta-info .popup h3, .painel-bairro h3 { font-size: 20px; line-height: 1.25; margin: 10px 36px 8px 0; color: var(--texto); }
+.gaveta-info .popup .linha { font-size: 13px; margin: 6px 0; }
+.gaveta-info .popup .sev, .info-tag { font-size: 12px; padding: 3px 9px; border-radius: 6px; }
+.gaveta-info .btn-detalhes { margin-top: 12px; }
+.gaveta-info .leito-grupos li, .gaveta-info .obra-barras li { font-size: 13px; }
+/* faixa no topo da gaveta na cor da situação do que está aberto */
+.gaveta-info::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--faixa, var(--navy)); }
+.gaveta-info:has(.sev.critica, .sev.leito-critica, .sev.escola-critica, .sev.obra-atrasada, .sev.risco-alto) { --faixa: var(--critica); }
+.gaveta-info:has(.sev.alta) { --faixa: var(--alta); }
+.gaveta-info:has(.sev.media, .sev.leito-atencao, .sev.escola-atencao, .sev.risco-medio) { --faixa: var(--media); }
+.gaveta-info:has(.sev.obra-paralisada) { --faixa: #7f1d1d; }
+.gaveta-info:has(.sev.leito-ok, .sev.escola-ok, .sev.obra-concluida) { --faixa: var(--positivo); }
+
+.info-tag { display: inline-block; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; background: var(--navy); color: var(--sobre-navy); }
+.painel-bairro h4 { margin: 18px 0 8px; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--suave); }
+.bairro-pop { margin: 0; color: var(--suave); font-size: 13px; }
+.bairro-kpis { list-style: none; margin: 14px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.bairro-kpis li { background: rgba(241, 245, 249, 0.85); border-radius: 12px; padding: 10px 12px; }
+.bairro-kpis b { display: block; font-size: 24px; line-height: 1.1; color: var(--texto); font-variant-numeric: tabular-nums; }
+.bairro-kpis small { font-size: 12px; color: var(--suave); }
+.bairro-kpis li.ruim b, .painel-bairro .ruim { color: var(--critica); }
+.bairro-kpis li.bom b { color: var(--positivo); }
+.bairro-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.bairro-lista button {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; cursor: pointer;
+  border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(255, 255, 255, 0.7); border-radius: 10px; padding: 8px 10px; font: inherit; color: var(--texto);
+}
+.bairro-lista button:hover { background: #fff; border-color: #94a3b8; }
+.bairro-lista .ti-chevron-right { margin-left: auto; color: var(--suave); }
+.bairro-item { display: flex; flex-direction: column; min-width: 0; }
+.bairro-item b { font-size: 13px; font-weight: 600; }
+.bairro-item small { font-size: 12px; color: var(--suave); }
+.sev-pt { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--media); }
+.sev-pt.critica { background: var(--critica); } .sev-pt.alta { background: var(--alta); }
+.bairro-vazio { margin: 0; font-size: 13px; color: var(--positivo); }
+.bairro-equip { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13px; }
+.bairro-equip .ti { color: var(--navy-texto); margin-right: 4px; }
+.bairro-acoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+
+/* ---------- linha do tempo ---------- */
+.linha-tempo {
+  position: absolute; left: 50%; bottom: 44px; transform: translateX(-50%); z-index: 6;
+  width: min(820px, calc(100% - 32px)); display: flex; align-items: center; gap: 12px;
+  border-radius: 16px; padding: 10px 12px 10px 10px;
+}
+.linha-tempo[hidden] { display: none; }
+.lt-tocar {
+  flex: none; width: 38px; height: 38px; border-radius: 50%; border: 0; cursor: pointer;
+  background: var(--navy); color: var(--sobre-navy); display: grid; place-items: center; font-size: 18px;
+}
+.lt-tocar .ti { color: #fff; }
+.lt-dia-rot { flex: none; position: relative; }
+.lt-dia {
+  display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 8px 0 10px; white-space: nowrap;
+  border: 1px solid rgba(148, 163, 184, 0.45); border-radius: 10px; background: rgba(255, 255, 255, 0.75);
+  font: inherit; font-size: 13px; font-weight: 600; color: var(--texto); cursor: pointer; font-variant-numeric: tabular-nums;
+}
+.lt-dia:hover, .lt-dia[aria-expanded="true"] { border-color: var(--navy); background: #fff; }
+.lt-dia .ti { color: var(--navy-texto); font-size: 16px; }
+.lt-dia .lt-dia-seta { font-size: 14px; color: var(--suave); transition: transform 0.15s; }
+.lt-dia[aria-expanded="true"] .lt-dia-seta { transform: rotate(180deg); }
+.lt-dia:focus-visible, .lt-cal button:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+
+/* Calendário: abre para cima, sobre o mapa (a barra fica na base). */
+.lt-cal {
+  position: absolute; left: -10px; bottom: calc(100% + 14px); z-index: 20; width: 276px; padding: 10px 12px 12px;
+  background: rgba(255, 255, 255, 0.98); border: 1px solid rgba(148, 163, 184, 0.35); border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(15, 23, 42, 0.08);
+  animation: lt-cal-abre 0.14s ease-out;
+}
+.lt-cal[hidden] { display: none; }
+@keyframes lt-cal-abre { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { .lt-cal { animation: none; } }
+.lt-cal-topo { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.lt-cal-mes { display: inline-block; font-size: 14px; color: var(--navy-texto); }
+.lt-cal-mes::first-letter { text-transform: uppercase; } /* "Novembro de 2026", não "Novembro De 2026" */
+.lt-cal-nav {
+  width: 30px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: var(--navy-texto);
+  display: grid; place-items: center; font-size: 16px; cursor: pointer;
+}
+.lt-cal-nav:hover:not(:disabled) { background: color-mix(in srgb, var(--navy) 8%, transparent); }
+.lt-cal-nav:disabled { color: #cbd5e1; cursor: default; }
+.lt-cal-grade { display: flex; flex-direction: column; gap: 2px; }
+.lt-cal-grade [role="row"] { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.lt-cal-sem span { text-align: center; font-size: 12px; font-weight: 600; color: var(--suave); padding: 2px 0 4px; }
+.lt-cal-d {
+  width: 100%; aspect-ratio: 1; max-height: 34px; border: 0; border-radius: 8px; background: transparent;
+  font: inherit; font-size: 13px; color: var(--texto); cursor: pointer; font-variant-numeric: tabular-nums;
+}
+.lt-cal-d:hover:not(:disabled) { background: color-mix(in srgb, var(--navy) 8%, transparent); }
+.lt-cal-d:disabled { color: #cbd5e1; cursor: default; }
+.lt-cal-d.hoje { font-weight: 700; color: var(--navy-texto); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--navy) 40%, transparent); }
+.lt-cal-d.escolhido, .lt-cal-d.escolhido:hover { background: var(--navy); color: var(--sobre-navy); box-shadow: none; }
+.lt-cal-atalhos { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(148, 163, 184, 0.3); }
+.lt-cal-atalhos button {
+  border: 1px solid rgba(148, 163, 184, 0.45); background: #fff; border-radius: 999px; padding: 4px 10px;
+  font: inherit; font-size: 12px; font-weight: 600; color: var(--navy-texto); cursor: pointer;
+}
+.lt-cal-atalhos button:hover { border-color: var(--navy); }
+.lt-regua { flex: 1; min-width: 0; padding-top: 18px; }
+.lt-trilho { position: relative; }
+.lt-regua input { position: relative; z-index: 1; width: 100%; margin: 0; accent-color: var(--navy); cursor: pointer; }
+/* Hoje: o trecho depois de agora (ainda não aconteceu) fica riscado sobre a régua. */
+.lt-trilho::after {
+  content: ''; position: absolute; top: 50%; height: 6px; transform: translateY(-50%); z-index: 2; pointer-events: none;
+  left: var(--limite, 100%); right: 0; border-radius: 0 4px 4px 0;
+  background: repeating-linear-gradient(-45deg, rgba(148, 163, 184, 0.55) 0 3px, rgba(255, 255, 255, 0.8) 3px 6px);
+}
+.linha-tempo.dia-passado .lt-trilho::after { display: none; }
+/* Balão com a hora sobre o polegar da régua. */
+.lt-balao {
+  position: absolute; bottom: calc(100% + 2px); left: clamp(18px, var(--p, 100%), calc(100% - 18px)); transform: translateX(-50%);
+  background: var(--navy); color: var(--sobre-navy); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums;
+  padding: 1px 6px; border-radius: 6px; white-space: nowrap; pointer-events: none;
+}
+.linha-tempo.no-agora .lt-balao { background: var(--critica); }
+.lt-marcas { display: flex; justify-content: space-between; font-size: 12px; color: var(--suave); margin-top: 1px; font-variant-numeric: tabular-nums; }
+.lt-info { flex: none; width: 104px; display: flex; flex-direction: column; line-height: 1.2; }
+.lt-quando { font-size: 14px; color: var(--texto); font-variant-numeric: tabular-nums; }
+.lt-quantas { font-size: 12px; color: var(--suave); }
+.lt-ao-vivo {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(148, 163, 184, 0.45);
+  background: rgba(255, 255, 255, 0.7); border-radius: 999px; padding: 5px 10px; font: inherit; font-size: 12px; font-weight: 600; color: var(--suave); cursor: pointer;
+}
+.lt-ao-vivo .ponto, .telao-vivo .ponto { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; }
+.linha-tempo.no-agora .lt-ao-vivo { color: var(--critica); border-color: rgba(220, 38, 38, 0.35); }
+.linha-tempo.no-agora .lt-ao-vivo .ponto, .telao-vivo .ponto { background: var(--critica); animation: piscar 1.6s ease-in-out infinite; }
+@keyframes piscar { 50% { opacity: 0.25; } }
+.linha-tempo .lt-fechar { flex: none; }
+/* No passado, o mapa ganha um tom sépia leve: fica claro que não é o "agora". */
+body.com-linha-tempo:has(.linha-tempo:not(.no-agora)) .palco .maplibregl-canvas { filter: sepia(0.25) saturate(0.85); }
+body.com-linha-tempo .doca { opacity: 0; pointer-events: none; }
+body.compacto .linha-tempo { display: none; }
+@media (max-width: 720px) {
+  .linha-tempo { gap: 8px; padding: 8px; bottom: 92px; }
+  .linha-tempo { flex-wrap: wrap; }
+  .lt-regua { order: 5; flex-basis: 100%; }
+  .lt-marcas span:nth-child(even) { visibility: hidden; }
+  .lt-info { width: auto; flex: 1; min-width: 0; }
+  .lt-dia .lt-dia-seta { display: none; }
+  .lt-cal { left: -2px; }
+  /* Só a bolinha: sem o botão, no celular não havia como voltar ao vivo com "Hoje" já escolhido. */
+  .lt-ao-vivo { padding: 9px; }
+  .lt-ao-vivo-txt { display: none; }
+}
+
+/* ---------- modo telão ---------- */
+body.telao-ativo { overflow: hidden; }
+body.telao-ativo .menu, body.telao-ativo .sob-topo, body.telao-ativo .base-palco, body.telao-ativo .doca,
+body.telao-ativo .topo-botoes, body.telao-ativo .dashboard, body.telao-ativo .aviso-novo, body.telao-ativo .gavetas,
+body.telao-ativo .palco .maplibregl-ctrl-bottom-right, body.telao-ativo .palco .maplibregl-ctrl-bottom-left,
+body.telao-ativo .mapa-legenda, body.telao-ativo .linha-tempo { display: none !important; }
+body.telao-ativo .palco { height: 100vh !important; }
+body.telao-ativo .topo { left: 24px; right: auto; max-width: min(760px, calc(100vw - 48px)); }
+.telao { position: fixed; inset: 0; z-index: 5000; pointer-events: none; }
+.telao[hidden] { display: none; }
+.telao-cartao {
+  position: absolute; left: 32px; bottom: 32px; max-width: min(620px, calc(100vw - 64px)); pointer-events: auto;
+  background: rgba(15, 23, 42, 0.86); color: #f8fafc; border-radius: 20px; padding: 20px 26px 22px;
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  border-left: 6px solid #94a3b8; overflow: hidden; animation: telao-entra 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.telao-cartao.critica { border-left-color: var(--critica); }
+.telao-cartao.alta { border-left-color: var(--alta); }
+.telao-cartao.media { border-left-color: var(--media); }
+.telao-cartao.cidade { border-left-color: var(--ouro); }
+/* Cartão do alerta: topo (gravidade, secretaria, fila) → título → onde/afetados/motivos → prazo → a seguir. */
+.telao-cartao { --cor: #94a3b8; width: clamp(420px, 38vw, 720px); max-width: calc(100vw - 64px); }
+.telao-cartao.critica { --cor: var(--critica); }
+.telao-cartao.alta { --cor: var(--alta); }
+.telao-cartao.media { --cor: var(--media); }
+.telao-cartao.cidade { --cor: var(--ouro); width: auto; max-width: min(680px, calc(100vw - 64px)); }
+.tc-topo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.tc-sev {
+  font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #fff;
+  background: var(--cor); border-radius: 999px; padding: 3px 11px;
+}
+.telao-cartao.cidade .tc-sev { color: #0f172a; }
+.tc-area { font-size: 14px; color: #cbd5e1; font-weight: 600; }
+.tc-fila { margin-left: auto; display: inline-flex; gap: 5px; }
+.tc-fila i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.22); transition: background 0.3s, transform 0.3s; }
+.tc-fila i.visto { background: rgba(255, 255, 255, 0.5); }
+.tc-fila i.atual { background: #fff; transform: scale(1.35); }
+.tc-titulo { display: block; font-size: clamp(24px, 2.5vw, 40px); line-height: 1.12; font-weight: 750; letter-spacing: -0.01em; }
+.tc-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: clamp(14px, 1.15vw, 18px); color: #cbd5e1; }
+/* Prazo: o número grande diz quanto falta (ou quanto passou); a barra, quanto do prazo já foi usado. */
+.tc-prazo {
+  display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 16px; margin-top: 16px;
+  padding: 12px 16px; border-radius: 14px; background: rgba(255, 255, 255, 0.06);
+}
+.tc-prazo small { font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; color: #94a3b8; font-weight: 700; }
+.tc-prazo strong { font-size: clamp(22px, 2.2vw, 34px); font-weight: 800; font-variant-numeric: tabular-nums; color: #f8fafc; text-align: right; }
+.tc-prazo span { grid-column: 1 / -1; font-size: 14px; color: #fecaca; }
+.tc-prazo-barra { grid-column: 1 / -1; position: relative; height: 6px; margin-top: 8px; border-radius: 99px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.tc-prazo-barra::after { content: ''; position: absolute; inset: 0 auto 0 0; width: var(--usado); border-radius: inherit; background: #4ade80; }
+.tc-prazo.meio .tc-prazo-barra::after { background: #fbbf24; }
+.tc-prazo.quase .tc-prazo-barra::after { background: #f87171; }
+.tc-prazo.quase strong { color: #fca5a5; }
+.tc-prazo.atrasada { background: rgba(220, 38, 38, 0.22); box-shadow: inset 0 0 0 1px rgba(248, 113, 113, 0.5); animation: tc-alarme 2s ease-in-out infinite; }
+.tc-prazo.atrasada small, .tc-prazo.atrasada strong { color: #fecaca; }
+.tc-prazo.campo { background: rgba(34, 197, 94, 0.14); grid-template-columns: 1fr; }
+.tc-prazo.campo strong { text-align: left; font-size: clamp(18px, 1.6vw, 24px); color: #bbf7d0; }
+@keyframes tc-alarme { 50% { background: rgba(220, 38, 38, 0.36); } }
+.tc-acao { margin-top: 10px; font-size: 15px; font-weight: 700; color: #fde68a; }
+.tc-pausa { margin-top: 10px; font-size: 15px; font-weight: 700; color: #fde68a; }
+.tc-seguir { margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 14px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tc-seguir small { font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; margin-right: 6px; color: #64748b; }
+/* Faixa de ocorrência nova, no alto e no centro. */
+.telao-faixa {
+  /* Abaixo do cabeçalho com os números (que fica à esquerda, no alto) */
+  position: absolute; top: calc(var(--topo-h, 56px) + 40px); left: 50%; transform: translateX(-50%); max-width: min(900px, calc(100vw - 64px));
+  display: flex; align-items: center; gap: 10px; padding: 12px 22px; border-radius: 999px; pointer-events: auto;
+  background: var(--critica); color: #fff; font-size: clamp(15px, 1.3vw, 20px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  box-shadow: 0 16px 40px rgba(220, 38, 38, 0.45); animation: telao-faixa 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.telao-faixa.alta { background: var(--alta); box-shadow: 0 16px 40px rgba(234, 88, 12, 0.4); }
+.telao-faixa.media { background: var(--media); color: #1f2937; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25); }
+.telao-faixa[hidden] { display: none; }
+.telao-faixa b { text-transform: uppercase; letter-spacing: 0.06em; }
+.telao-faixa .ponto { flex: none; width: 10px; height: 10px; border-radius: 50%; background: currentColor; animation: piscar 1s ease-in-out infinite; }
+@keyframes telao-faixa { from { opacity: 0; transform: translate(-50%, -24px); } to { opacity: 1; transform: translate(-50%, 0); } }
+/* Bordas escurecidas: o cartão e o relógio leem melhor sobre o mapa claro, numa TV a distância. */
+.telao::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.32), transparent 38%), linear-gradient(to bottom, rgba(15, 23, 42, 0.14), transparent 16%);
+}
+/* Sem mexer no mouse por 3 s: somem os botões e o cursor. */
+body.telao-ocioso, body.telao-ocioso * { cursor: none !important; }
+body.telao-ocioso .telao-botoes { opacity: 0; pointer-events: none; }
+.telao-botoes { transition: opacity 0.4s; }
+/* A barra espera a câmera chegar ao ponto (classe "andando") para começar a contar. */
+.telao-progresso { position: absolute; left: 0; bottom: 0; height: 4px; width: 100%; background: rgba(255, 255, 255, 0.5); transform-origin: left; animation: telao-progresso var(--dur) linear both paused; }
+.telao-progresso.andando { animation-play-state: running; }
+.telao-cartao.nova { box-shadow: 0 0 0 3px var(--cor), 0 24px 60px rgba(0, 0, 0, 0.35); }
+@keyframes telao-progresso { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes telao-entra { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+.telao-canto {
+  position: absolute; top: 24px; right: 28px; display: flex; align-items: center; gap: 14px; pointer-events: auto;
+  background: rgba(15, 23, 42, 0.78); color: #f8fafc; border-radius: 14px; padding: 10px 16px; font-size: 16px; font-weight: 600;
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+.telao-filtro { font-size: 13px; font-weight: 700; color: #fde68a; padding-right: 14px; border-right: 1px solid rgba(255, 255, 255, 0.18); }
+.telao-filtro[hidden] { display: none; }
+.telao-vivo { display: inline-flex; align-items: center; gap: 6px; color: #fca5a5; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+.telao-botoes { position: absolute; right: 28px; bottom: 28px; display: flex; gap: 10px; }
+.telao-sair, .telao-pausar {
+  pointer-events: auto; opacity: 0.35; transition: opacity 0.2s, background 0.2s;
+  display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 12px; padding: 9px 14px; cursor: pointer;
+  background: rgba(15, 23, 42, 0.8); color: #f8fafc; font: inherit; font-size: 13px;
+}
+.telao-sair:hover, .telao-sair:focus-visible, .telao-pausar:hover, .telao-pausar:focus-visible { opacity: 1; }
+.telao-sair kbd, .telao-pausar kbd { background: rgba(255, 255, 255, 0.15); border: 0; color: #fff; }
+.telao-sair .ti, .telao-pausar .ti { color: #fff; }
+/* Pausado: o botão fica bem visível (é o jeito de voltar ao movimento). */
+.telao.pausado .telao-pausar { opacity: 1; background: var(--ouro); color: #0f172a; }
+.telao.pausado .telao-pausar .ti { color: #0f172a; }
+.telao.pausado .telao-pausar kbd { background: rgba(15, 23, 42, 0.15); color: #0f172a; }
+@media (prefers-reduced-motion: reduce) { .telao-cartao, .telao-progresso, .telao-faixa, .tc-prazo.atrasada { animation: none; } }
+/* No telão, o cartão grande já diz o que é: o resumo escuro do pino sairia duplicado. */
+body.telao-ativo .resumo-ml { display: none; }
+
+/* ---------- tela de carregamento (entrada) ---------- */
+.carregando {
+  position: fixed; inset: 0; z-index: 6000; display: grid; place-items: center;
+  background: radial-gradient(circle at 50% 40%, var(--navy-medio) 0%, var(--navy) 45%, var(--navy-escuro) 100%);
+  transition: opacity 0.5s ease, visibility 0.5s;
+}
+.carregando.saindo { opacity: 0; visibility: hidden; pointer-events: none; }
+.carregando-caixa { display: flex; flex-direction: column; align-items: center; gap: 10px; color: #e2e8f0; text-align: center; padding: 24px; }
+.carregando-caixa b { font-size: 24px; font-weight: 700; color: var(--sobre-navy); letter-spacing: 0.01em; }
+.carregando-caixa span { font-size: 14px; color: #cbd5e1; }
+.carregando-anel {
+  position: relative; width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 6px;
+  background: color-mix(in srgb, var(--sobre-navy) 8%, transparent);
+}
+.carregando-anel::before {
+  content: ''; position: absolute; inset: -4px; border-radius: 50%;
+  border: 3px solid color-mix(in srgb, var(--ouro) 20%, transparent); border-top-color: var(--ouro);
+  animation: carregando-gira 0.9s linear infinite;
+}
+.carregando-anel .ti { font-size: 32px; color: var(--ouro-texto); }
+.carregando-barra { position: relative; display: block; width: 180px; height: 3px; margin-top: 8px; border-radius: 3px; background: color-mix(in srgb, var(--sobre-navy) 12%, transparent); overflow: hidden; }
+.carregando-barra::after {
+  content: ''; position: absolute; inset: 0; width: 40%; border-radius: 3px; background: var(--ouro);
+  animation: carregando-barra 1.3s ease-in-out infinite;
+}
+@keyframes carregando-gira { to { transform: rotate(360deg); } }
+@keyframes carregando-barra { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+@media (prefers-reduced-motion: reduce) {
+  .carregando-anel::before, .carregando-barra::after { animation-duration: 3s; }
+}

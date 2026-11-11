@@ -1,0 +1,7 @@
+/* Perfis de acesso (js/perfil.js). O que cada perfil não vê; a regra de verdade está no JS (rotas e ações).
+   O perfil Cidadão não usa esta página: tem o Portal do Cidadão (cidadao.html, css/cidadao.css). */
+.perfil-chip { font-size: 12px; font-weight: 600; color: var(--navy-texto); background: color-mix(in srgb, var(--navy) 8%, transparent); border-radius: 999px; padding: 2px 9px; vertical-align: middle; white-space: nowrap; }
+body.perfil-setor .perfil-chip { background: #eff6ff; color: #1d4ed8; }
+
+/* Gestor do setor: sem os modos da demonstração do prefeito (tour e telão falam da cidade inteira). */
+body.perfil-setor #btn-tour, body.perfil-setor #btn-telao { display: none !important; }
