@@ -115,9 +115,25 @@
     };
   }
 
+  // "Faça um card sobre a coleta", "imagem para redes do aviso de chuva" → modelo do Estúdio já preenchido.
+  function imagem(texto) {
+    const q = ` ${norm(texto)} `;
+    const modelo = /chuva|aviso|alerta|alaga|desliza|risco/.test(q) ? 'aviso' : /entreg|inaugur|obra conclu|conquista/.test(q) ? 'entrega' : /evolu|grafico|meses|historico/.test(q) ? 'evolucao' : 'numero';
+    const CHAVES = { saude: 'saude|ubs|hospital|vacina', infraestrutura: 'energia|obra|infra', educacao: 'escola|educa|aluno', defesa_civil: 'alaga|defesa', seguranca: 'seguran|crime|b\\.o', mobilidade: 'transito|onibus|mobilidade|desloc', limpeza: 'coleta|lixo|limpeza' };
+    const area = Object.keys(CHAVES).find((a) => new RegExp(CHAVES[a]).test(q));
+    const alvo = modelo === 'numero' || modelo === 'evolucao' ? (area || null) : null;
+    const nomes = { numero: 'Número em destaque', evolucao: 'Evolução em 6 meses', aviso: 'Aviso à população', entrega: 'Entrega à população' };
+    return {
+      cenario: 'imagem',
+      texto: `Preparei no Estúdio o modelo "${nomes[modelo]}"${alvo ? ` com os dados da ${GC.data.areas.find((a) => a.id === alvo).secretaria.nome}` : ''}. Os números vêm da base e as cores e o logo, da marca; é só conferir e baixar o PNG.`,
+      acoes: [{ rotulo: '🖼 Abrir no Estúdio', tipo: 'abrirTela', payload: { rota: { tela: 'estudio', modelo, alvo } } }],
+    };
+  }
+
   const EH_CRUZAR = /\bcruz|correlac|relacao entre|versus|\bvs\b| x |compar(e|ar) .+ com/;
   GC.ia.perguntar = function (texto, contexto = {}) {
     const q = ` ${norm(texto)} `;
+    if (GC.MODELOS_ESTUDIO && /\b(card|post|postagem|imagem|arte|banner)\b/.test(q)) return imagem(texto);
     if (GC.cruzamento && EH_CRUZAR.test(q)) return cruzar(texto, contexto);
     if (/\b(gerar|gere|montar|monte|fazer|faca)\b.*relatorio|^ relatorio /.test(q)) return relatorio(contexto);
     if (/bairro.*(pior|mais critic|mais grave|mais problema)|pior bairro/.test(q)) return piorBairro(contexto);

@@ -82,7 +82,7 @@
     if (rota.tela === 'secretaria' || rota.tela === 'secretarias') return rota.area === a ? rota : { tela: 'secretaria', area: a };
     const daPasta = (id) => ((GC.CATALOGO_INDICADORES || []).find((i) => i.id === id) || {}).area === a;
     if (rota.tela === 'cruzamento') return rota; // a tela só oferece os indicadores da pasta (+ chuva)
-    if (rota.tela === 'personalizar' || rota.tela === 'admin') return { tela: 'painel' }; // marca e administração: só o gestor geral
+    if (rota.tela === 'personalizar' || rota.tela === 'admin' || rota.tela === 'estudio') return { tela: 'painel' }; // marca e administração: só o gestor geral
     if (rota.tela === 'indicadores') return rota.alvo === a || daPasta(rota.alvo) ? rota : { tela: 'indicadores', alvo: a };
     if (rota.tela === 'relatorios') return rota.tipo === 'secretaria' && rota.alvo === a ? rota : { tela: 'relatorios', tipo: 'secretaria', alvo: a, periodo: GC.periodoDoRelatorio ? GC.periodoDoRelatorio('secretaria', rota.periodo) : '30' };
     return { tela: 'secretaria', area: a }; // dados, cidadão: fora do perfil

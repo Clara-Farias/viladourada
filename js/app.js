@@ -529,7 +529,7 @@
     }
 
     // ---- telas: o Painel é o próprio mapa; as outras abrem num painel sobre ele, esmaecido ----
-    const TELAS = { admin: $('tela-admin'), cruzamento: $('tela-cruzamento'), personalizar: $('tela-personalizar'), relatorios: $('tela-relatorios'), alertas: $('tela-alertas'), dados: $('tela-dados'), secretarias: $('tela-secretarias'), secretaria: $('tela-secretaria'), crise: $('tela-crise') };
+    const TELAS = { estudio: $('tela-estudio'), admin: $('tela-admin'), cruzamento: $('tela-cruzamento'), personalizar: $('tela-personalizar'), relatorios: $('tela-relatorios'), alertas: $('tela-alertas'), dados: $('tela-dados'), secretarias: $('tela-secretarias'), secretaria: $('tela-secretaria'), crise: $('tela-crise') };
 
     // ---- Gabinete de crise: nasce do botão "Gabinete de crise" de uma ocorrência ou da previsão de chuva ----
     // Salvos no navegador (por cidade): recarregar a página não apaga a sala, o registro nem os comunicados.
@@ -703,6 +703,7 @@
       aoPerguntar: (texto) => { abrirCopiloto(); perguntar(texto); },
     });
     const telaPersonalizar = GC.criarTelaPersonalizar($('tela-personalizar'));
+    const telaEstudio = GC.criarTelaEstudio($('tela-estudio'), { store, aoIr: (r) => rotas.ir(r) });
     const telaAdmin = GC.criarTelaAdmin($('tela-admin'), {
       store,
       aoIr: (r, ocorrenciaId) => { rotas.ir(r); if (ocorrenciaId) noPainel(() => focar(ocorrenciaId)); },
@@ -807,6 +808,7 @@
       if (tela === 'cruzamento') telaCruzamento.mostrar(rota);
       if (tela === 'personalizar') telaPersonalizar.mostrar();
       if (tela === 'admin') telaAdmin.mostrar(rota);
+      if (tela === 'estudio') telaEstudio.mostrar(rota);
       if (tela === 'crise') telaCrise.mostrar(estadoCrise(rota));
       if (ehIndicadores) {
         abrirDashboard(true);

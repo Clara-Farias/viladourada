@@ -50,6 +50,7 @@
       // Indicadores fica fora do menu: a porta é "Indicadores", na doca da base do mapa.
       { rota: { tela: 'relatorios', tipo: 'executivo', alvo: '-', periodo: '30' }, emoji: '📄', nome: 'Relatórios' },
       { rota: { tela: 'cruzamento' }, emoji: '🔀', nome: 'Cruzamento de dados' },
+      { rota: { tela: 'estudio' }, emoji: '🖼', nome: 'Estúdio' },
       // Dados fica fora do menu: a porta é "Dados", no menu ⋯ do cabeçalho.
     ];
     const ITENS = GC.menuDoPerfil ? GC.menuDoPerfil(ITENS_GESTOR) : ITENS_GESTOR;

@@ -42,6 +42,7 @@
     // A tabela é validada pela tela (ela conhece as tabelas); id desconhecido abre a primeira.
     if (partes[0] === 'cruzamento') return { tela: 'cruzamento', a: partes[1] || null, b: partes[2] || null, meses: Number(partes[3]) || 3, recorte: partes[4] || 'cidade' };
     if (partes[0] === 'personalizar' && partes.length === 1) return { tela: 'personalizar' };
+    if (partes[0] === 'estudio') return { tela: 'estudio', modelo: partes[1] || null, alvo: partes[2] ? decodeURIComponent(partes[2]) : null };
     if (partes[0] === 'admin') return { tela: 'admin', aba: partes[1] || 'consistencia' };
     if (partes[0] === 'dados') return { tela: 'dados', tabela: partes[1] ? decodeURIComponent(partes[1]) : null };
     return PAINEL;
@@ -49,6 +50,7 @@
 
   GC.hashDe = function (rota) {
     if (rota.tela === 'secretaria') return `#/secretaria/${rota.area}`;
+    if (rota.tela === 'estudio') return rota.modelo ? `#/estudio/${rota.modelo}${rota.alvo ? `/${encodeURIComponent(rota.alvo)}` : ''}` : '#/estudio';
     if (rota.tela === 'admin') return `#/admin/${rota.aba || 'consistencia'}`;
     if (rota.tela === 'cruzamento') return rota.a && rota.b ? `#/cruzamento/${rota.a}/${rota.b}/${rota.meses || 3}/${rota.recorte || 'cidade'}` : '#/cruzamento';
     if (rota.tela === 'dados') return rota.tabela ? `#/dados/${rota.tabela}` : '#/dados';
